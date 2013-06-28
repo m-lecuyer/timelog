@@ -113,7 +113,6 @@ function setTime(timerDiv) {
   var now = new Date;
   var startDiv = timerDiv.find('.fa-start');
   var start = new Date(startDiv.attr('id'));
-  console.log(startDiv.attr('id'));
   delta = Math.round((now - start)/1000);
   h = Math.floor(delta / 3600);
   m = Math.floor((delta % 3600) / 60);
@@ -134,8 +133,6 @@ function stopTimer(timerDiv) {
 
 function updateTotal(timerDiv, sTime) {
   totalNode = timerDiv.find('.fa-total');
-  console.log(totalNode.attr('id'));
-  console.log(parseInt(totalNode.attr('id')));
   newTot = parseInt(totalNode.attr('id')) + sTime;
   totalNode.attr('id', newTot.toString());
   h = Math.floor(newTot / 3600);
@@ -228,5 +225,4 @@ if (isRightIframe() && isPluginContext()) {
   setTimeout(function () { resetData(); }, 850);
   setTimeout(function () { startSaving(); }, 1200);
   }
-console.log("popup injected");
 
