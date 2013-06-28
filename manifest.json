@@ -6,7 +6,8 @@
     "version": "0.1",
 
     "browser_action": {
-      "default_icon": "ressources/icon.png"
+      "default_icon": "ressources/icon.png",
+      "default_popup": "src/popup/popup.html"
     },
 
     "background": {"persistent": true,
@@ -16,7 +17,8 @@
       "webNavigation",
       "webRequest",
       "tabs",
-      "http://*/*", "https://*/*"
+      "http://*/*",
+      "https://*/*"
     ],
 
     "content_scripts": [
