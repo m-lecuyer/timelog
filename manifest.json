@@ -1,0 +1,35 @@
+{
+  "manifest_version": 2,
+
+    "name": "timelog",
+    "description": "Rally extension for time logging.",
+    "version": "0.1",
+
+    "browser_action": {
+      "default_icon": "ressources/icon.png"
+    },
+
+    "background": {"persistent": true,
+                    "scripts": ["src/background/eventbackground.js"]},
+
+    "permissions": [
+      "webNavigation",
+      "webRequest",
+      "tabs",
+      "http://*/*", "https://*/*"
+    ],
+
+    "content_scripts": [
+      {
+        "matches": ["https://rally1.rallydev.com/slm/analytics/timeTrack"],
+        "css": ["src/helpers/bootstrap/css/bootstrap.min.prefixed.css"],
+        "js": [ "src/helpers/jquery-1.9.1.min.js",
+                "src/helpers/insertionQuery/insQ.js",
+                "src/background/insert.js",
+                "src/background/timer.js"],
+        "all_frames": true
+      }
+    ],
+
+    "web_accessible_resources": ["src/background/timer.js", "src/helpers/jquery-1.9.1.min.js"]
+}
