@@ -1,3 +1,6 @@
+/*
+ * utilities
+ */
 function isRightIframe() {
   return document.URL == "https://rally1.rallydev.com/slm/analytics/timeTrack";
 }
@@ -6,6 +9,23 @@ function isPluginContext() {
   if (chrome.runtime)
     return true;
   return false;
+}
+
+function getRowID(timerDiv) {
+  var t1 = timerDiv.find('div.x-grid3-col-2').find('a').text();
+  var t2 = timerDiv.find('div.x-grid3-col-3').find('a').text();
+  return t1+t2;
+}
+
+/*
+ * handle timers
+ */
+function toggleTimerOfRow(obj) {
+  var row = $(obj).parents('div.x-grid3-row');
+  if (row.find("div.fa-timer").length != 0)
+    row.find("div.fa-timer").remove();
+  else
+    addTimer(row);
 }
 
 function addTimerToSelected () {
@@ -118,22 +138,57 @@ function updateTotal(timerDiv, sTime) {
   totalNode.text(h+"h "+m+"m "+s+"s");
 }
 
-function getRowID(timerDiv) {
-  var t1 = timerDiv.find('div.x-grid3-col-2').find('a').text();
-  var t2 = timerDiv.find('div.x-grid3-col-3').find('a').text();
-  return t1+t2;
+/*
+ * custom rows
+ */
+function addRowButtons() {
+  var imgUrl = chrome.extension.getURL("ressources/addTimer.png");
+  $('div.x-grid3-row').each(function (i, obj) {
+    var row = $(obj);
+    row.find('.x-grid3-td-1').append('<button class="fa-label-btn tb-btn tb-btn-link" OnClick="toggleLabel(this)">todo</button>');
+    row.find('.x-grid3-cell-first').append('<button class="tb-btn tb-btn-link" OnClick="toggleTimerOfRow(this)"><img src='+imgUrl+'></button>');
+  });
 }
 
-function resetTimes() {
-  console.log("RESET TIMES");
-  chrome.runtime.sendMessage({query: "times"}, function(response) {
-    var times = response.times;
-    console.log(times);
+function toggleLabel(obj) {
+  var btn = $(obj);
+  if (btn.text() == 'todo') {
+    btn.text('undo');
+    btn.parent().parent().find('.x-grid3-td-1').append('<span class="fa-label tb-label tb-label-success"> TODAY </span>');
+  } else if (btn.text() == 'undo') {
+    btn.text('todo');
+    btn.parent().parent().find('.fa-label').remove();
+  }
+}
+
+/*
+ * setup everything &
+ * save the data for persistence even with navigation
+ */
+function collectData() {
+  var r = {};
+  $('div.x-grid3-row').each(function (i, obj) {
+    var jobj = $(obj);
+    r[getRowID(jobj)] = { "start": jobj.find('.fa-start').text(),
+                           "startDate": jobj.find('.fa-start').attr('id'),
+                           "stop": jobj.find('.fa-stop').text(),
+                           "totalMS": jobj.find('.fa-total').attr('id'),
+                           "total": jobj.find('.fa-total').text(),
+                           "time": jobj.find('.fa-time').text(),
+                           "timer": jobj.find('.fa-start-stop').text(),
+                           "label": jobj.find('.fa-label-btn').text() }
+  });
+  return r;
+}
+
+function resetData() {
+  chrome.runtime.sendMessage({query: "data"}, function(response) {
+    var data = response.data;
     $('div.x-grid3-row').each(function (i, obj) {
-      jobj = $(obj);
+      var jobj = $(obj);
       var id = getRowID(jobj);
-      if (id in times) {
-        rowData = times[id];
+      if (id in data) {
+        var rowData = data[id];
         if (rowData.timer.length > 0) {
           addTimer(jobj);
           jobj.find('.fa-start').text(rowData.start);
@@ -147,36 +202,25 @@ function resetTimes() {
         if (rowData.timer == 'Stop') {
           runTimer(jobj);
         }
+        if (rowData.label == 'undo') {
+          toggleLabel(jobj.find('.fa-label-btn'));
+        }
       }
   });
   });
 }
 
-function collectTimes() {
-  var r = {};
-  $('div.x-grid3-row').each(function (i, obj) {
-    jobj = $(obj);
-    r[getRowID(jobj)] = { "start": jobj.find('.fa-start').text(),
-                           "startDate": jobj.find('.fa-start').attr('id'),
-                           "stop": jobj.find('.fa-stop').text(),
-                           "totalMS": jobj.find('.fa-total').attr('id'),
-                           "total": jobj.find('.fa-total').text(),
-                           "time": jobj.find('.fa-time').text(),
-                           "timer": jobj.find('.fa-start-stop').text() }
-  });
-  return r;
-}
-
 function startSaving() {
   setInterval(function() {
-    chrome.runtime.sendMessage({query: "save", times: collectTimes()}, function(response) {
+    chrome.runtime.sendMessage({query: "save", data: collectData()}, function(response) {
     });
   }, 1000);
 }
 
 if (isRightIframe() && isPluginContext()) {
-  setTimeout(function () { resetTimes(); }, 500);
-  setTimeout(function () { startSaving(); }, 1000);
+  setTimeout(function () { addRowButtons(); }, 700);
+  setTimeout(function () { resetData(); }, 850);
+  setTimeout(function () { startSaving(); }, 1200);
   }
 console.log("popup injected");
 

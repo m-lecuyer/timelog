@@ -1,5 +1,5 @@
 var tabId;
-var times = [];
+var data = [];
 
 chrome.browserAction.onClicked.addListener(function(tab) {
   tabId = tab.id;
@@ -9,12 +9,12 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 );
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-  if (request.query == "times") {
-    console.log(times);
-    sendResponse({times: times});
+  if (request.query == "data") {
+    console.log(data);
+    sendResponse({data: data});
   } else if (request.query == "save") {
-    times = request.times;
-    console.log(times);
+    data = request.data;
+    console.log(data);
   }
 });
 

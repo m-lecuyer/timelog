@@ -31,5 +31,5 @@
       }
     ],
 
-    "web_accessible_resources": ["src/background/timer.js", "src/helpers/jquery-1.9.1.min.js"]
+    "web_accessible_resources": ["ressources/addTimer.png", "src/background/timer.js", "src/helpers/jquery-1.9.1.min.js"]
 }
