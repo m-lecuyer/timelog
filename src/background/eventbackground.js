@@ -8,6 +8,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
 }
 );
 
+//handle the saving and reloading of timers through messages
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.query == "times") {
     console.log(times);

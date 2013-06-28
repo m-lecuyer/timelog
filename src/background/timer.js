@@ -1,3 +1,15 @@
+/*
+ * row utilities
+ */
+function getRowID(timerDiv) {
+  var t1 = timerDiv.find('div.x-grid3-col-2').find('a').text();
+  var t2 = timerDiv.find('div.x-grid3-col-3').find('a').text();
+  return t1+t2;
+}
+
+/*
+ * handle timers
+ */
 function isRightIframe() {
   return document.URL == "https://rally1.rallydev.com/slm/analytics/timeTrack";
 }
@@ -118,22 +130,16 @@ function updateTotal(timerDiv, sTime) {
   totalNode.text(h+"h "+m+"m "+s+"s");
 }
 
-function getRowID(timerDiv) {
-  var t1 = timerDiv.find('div.x-grid3-col-2').find('a').text();
-  var t2 = timerDiv.find('div.x-grid3-col-3').find('a').text();
-  return t1+t2;
-}
-
 function resetTimes() {
   console.log("RESET TIMES");
   chrome.runtime.sendMessage({query: "times"}, function(response) {
     var times = response.times;
     console.log(times);
     $('div.x-grid3-row').each(function (i, obj) {
-      jobj = $(obj);
+      var jobj = $(obj);
       var id = getRowID(jobj);
       if (id in times) {
-        rowData = times[id];
+        var rowData = times[id];
         if (rowData.timer.length > 0) {
           addTimer(jobj);
           jobj.find('.fa-start').text(rowData.start);
@@ -155,7 +161,7 @@ function resetTimes() {
 function collectTimes() {
   var r = {};
   $('div.x-grid3-row').each(function (i, obj) {
-    jobj = $(obj);
+    var jobj = $(obj);
     r[getRowID(jobj)] = { "start": jobj.find('.fa-start').text(),
                            "startDate": jobj.find('.fa-start').attr('id'),
                            "stop": jobj.find('.fa-stop').text(),
@@ -167,6 +173,43 @@ function collectTimes() {
   return r;
 }
 
+/*
+ * handle task reordering
+ */
+function addTopButtons() {
+  var imgUrl = chrome.extension.getURL("ressources/top.png");
+  $('div.x-grid3-row').each(function (i, obj) {
+    var row = $(obj);
+    row.find('.x-grid3-cell-first').append('<button OnClick="toTop(this)"><img src='+imgUrl+'></button>');
+  });
+}
+
+function toTop(obj) {
+  var row = $(obj).parents('div.x-grid3-row');
+  moveToTop(row);
+}
+
+function moveToTop(row) {
+  var body = row.parent();
+  row.remove();
+  body.prepend(row);
+  renameRowsIds();
+}
+
+function renameRowsIds() {
+  $($('div.x-grid3-row').get().reverse()).each(function (i, obj) {
+    var row = $(obj);
+    //row.removeClass('x-grid3-row-over').removeClass('x-grid3-row-selected');
+    var n = i + 164;
+    row.attr('id', 'ext-gen'+n);
+    i++;
+  });
+}
+
+/*
+ * setup everything &
+ * save the data for persistence even with navigation
+ */
 function startSaving() {
   setInterval(function() {
     chrome.runtime.sendMessage({query: "save", times: collectTimes()}, function(response) {
@@ -175,7 +218,8 @@ function startSaving() {
 }
 
 if (isRightIframe() && isPluginContext()) {
-  setTimeout(function () { resetTimes(); }, 500);
+  setTimeout(function () { addTopButtons(); }, 500);
+  setTimeout(function () { resetTimes(); }, 600);
   setTimeout(function () { startSaving(); }, 1000);
   }
 console.log("popup injected");
