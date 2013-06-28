@@ -23,7 +23,7 @@ function getRowID(timerDiv) {
 function toggleTimerOfRow(obj) {
   var row = $(obj).parents('div.x-grid3-row');
   if (row.find("div.fa-timer").length != 0)
-    row.find("div.fa-timer").remove();
+    deleteTimerDiv(row.find("div.fa-timer"));
   else
     addTimer(row);
 }
@@ -69,7 +69,13 @@ function timerOn(timerDiv) {
 }
 
 function done(obj) {
-  $(obj).parent().parent().remove();
+  timerDiv = $(obj).parent().parent();
+  deleteTimerDiv(timerDiv);
+}
+
+function deleteTimerDiv(timerDiv) {
+  stopTimer(timerDiv);
+  timerDiv.remove();
 }
 
 function timerToggle (obj) {
@@ -95,7 +101,7 @@ function startTimer (timerDiv) {
 function runTimer (timerDiv) {
   var tid = setInterval(function() {
     setTime(timerDiv);
-    if (timerDiv.find('.fa-start-stop').text() == 'Start')
+    if (timerDiv.find('.fa-start-stop').text() == 'Start' || !timerDiv)
       clearInterval(tid);
   }, 1000);
   var sButton = timerDiv.find('.fa-start-stop');
