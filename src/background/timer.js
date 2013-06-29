@@ -170,9 +170,11 @@ function toggleDone(obj) {
   if (btn.text() == 'done') {
     btn.text('enod');
     btn.parent().find('div').attr('style', 'text-decoration:line-through');
+    btn.parent().parent().find('div.tt_item').attr('style', 'text-decoration:line-through');
   } else if (btn.text() == 'enod') {
     btn.text('done');
     btn.parent().find('div').removeAttr('style');
+    btn.parent().parent().find('div.tt_item').removeAttr('style');
   }
 }
 
@@ -238,8 +240,8 @@ function startSaving() {
 }
 
 if (isRightIframe() && isPluginContext()) {
-  setTimeout(function () { addRowButtons(); }, 750);
-  setTimeout(function () { resetData(); }, 900);
+  setTimeout(function () { addRowButtons(); }, 700);
+  setTimeout(function () { resetData(); }, 800);
   setTimeout(function () { startSaving(); }, 1200);
   }
 
