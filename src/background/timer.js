@@ -148,6 +148,7 @@ function addRowButtons() {
   var imgUrl = chrome.extension.getURL("ressources/addTimer.png");
   $('div.x-grid3-row').each(function (i, obj) {
     var row = $(obj);
+    row.find('.x-grid3-td-1').append('<button class="fa-done-btn tb-btn tb-btn-link" OnClick="toggleDone(this)">done</button>');
     row.find('.x-grid3-td-1').append('<button class="fa-label-btn tb-btn tb-btn-link" OnClick="toggleLabel(this)">todo</button>');
     row.find('.x-grid3-cell-first').append('<button class="tb-btn tb-btn-link" OnClick="toggleTimerOfRow(this)"><img src='+imgUrl+'></button>');
   });
@@ -156,11 +157,22 @@ function addRowButtons() {
 function toggleLabel(obj) {
   var btn = $(obj);
   if (btn.text() == 'todo') {
-    btn.text('undo');
-    btn.parent().parent().find('.x-grid3-td-1').append('<span class="fa-label tb-label tb-label-success"> TODAY </span>');
-  } else if (btn.text() == 'undo') {
+    btn.text('odot');
+    btn.parent().parent().find('.x-grid3-td-1').find('div.x-grid3-cell-inner').append('<span class="fa-label tb-label tb-label-success"> TODAY </span>');
+  } else if (btn.text() == 'odot') {
     btn.text('todo');
     btn.parent().parent().find('.fa-label').remove();
+  }
+}
+
+function toggleDone(obj) {
+  var btn = $(obj);
+  if (btn.text() == 'done') {
+    btn.text('enod');
+    btn.parent().find('div').attr('style', 'text-decoration:line-through');
+  } else if (btn.text() == 'enod') {
+    btn.text('done');
+    btn.parent().find('div').removeAttr('style');
   }
 }
 
@@ -179,7 +191,9 @@ function collectData() {
                            "total": jobj.find('.fa-total').text(),
                            "time": jobj.find('.fa-time').text(),
                            "timer": jobj.find('.fa-start-stop').text(),
-                           "label": jobj.find('.fa-label-btn').text() }
+                           "label": jobj.find('.fa-label-btn').text(),
+                           "tsk-done": jobj.find('.fa-done-btn').text() }
+
   });
   return r;
 }
@@ -205,8 +219,11 @@ function resetData() {
         if (rowData.timer == 'Stop') {
           runTimer(jobj);
         }
-        if (rowData.label == 'undo') {
+        if (rowData.label == 'odot') {
           toggleLabel(jobj.find('.fa-label-btn'));
+        }
+        if (rowData['tsk-done'] == 'enod') {
+          toggleDone(jobj.find('.fa-done-btn'));
         }
       }
   });
@@ -221,8 +238,8 @@ function startSaving() {
 }
 
 if (isRightIframe() && isPluginContext()) {
-  setTimeout(function () { addRowButtons(); }, 700);
-  setTimeout(function () { resetData(); }, 850);
+  setTimeout(function () { addRowButtons(); }, 750);
+  setTimeout(function () { resetData(); }, 900);
   setTimeout(function () { startSaving(); }, 1200);
   }
 
